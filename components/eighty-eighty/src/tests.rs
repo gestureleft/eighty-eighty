@@ -22,6 +22,30 @@ fn parity() {
 }
 
 #[test]
+fn processor_status_word() {
+    let mut cpu = Cpu::new(|_| {});
+
+    assert_eq!(cpu.processor_status_word(), 0b01000000);
+
+    cpu.condition_codes.z = 1;
+
+    assert_eq!(cpu.processor_status_word(), 0b01000010);
+
+    cpu.condition_codes.s = 1;
+
+    assert_eq!(cpu.processor_status_word(), 0b01000011);
+
+    cpu.condition_codes.z = 0;
+
+    assert_eq!(cpu.processor_status_word(), 0b01000001);
+
+    cpu.condition_codes.s = 0;
+    cpu.condition_codes.cy = 1;
+
+    assert_eq!(cpu.processor_status_word(), 0b11000000);
+}
+
+#[test]
 fn mvi_and_add() -> Result<(), cpu::Error> {
     let mut cpu = Cpu::new(|_| {});
 
