@@ -18,6 +18,14 @@ button {
   padding: $small;
 }
 
+button:hover {
+  cursor: pointer;
+}
+
+button:active {
+  background-color: #334180;
+}
+
 .col {
   display: flex;
   flex-direction: column;
