@@ -178,9 +178,7 @@ impl<T: FnMut(u8)> Cpu<T> {
 
     pub(crate) fn emulate(&mut self) -> Result<(), Error> {
         while let Some(instruction) = self.fetch_instruction() {
-            println!("{:#06x} {}", self.pc, instruction);
             self.execute_instruction(instruction)?;
-            println!("{}", self);
             self.pc += instruction.op_bytes() as u16;
 
             if self.halted {
@@ -570,7 +568,6 @@ impl<T: FnMut(u8)> Cpu<T> {
         match reg {
             Reg::A => todo!(),
             Reg::B => {
-                println!("B: {:#08x}, C: {:#08x}", val >> 8, (val & 0xff));
                 self.b = (val >> 8) as u8;
                 self.c = (val & 0xff) as u8;
             }

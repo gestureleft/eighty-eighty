@@ -30,7 +30,9 @@ pub fn disassemble(bin: Vec<u8>) {
 }
 
 pub fn emulate(data: Vec<u8>) -> Result<Vec<u8>, cpu::Error> {
-    let mut cpu = cpu::Cpu::new(|_| {});
+    let mut cpu = cpu::Cpu::new(|b| {
+        println!("Bus was written to with value: {}", b);
+    });
     cpu.load_into_memory(data)?;
     cpu.emulate()?;
 
