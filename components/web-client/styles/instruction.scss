@@ -1,0 +1,13 @@
+@import "base";
+
+.instruction-pane {
+  height: 90%;
+  overflow: auto;
+  border: 1px solid $primary-color;
+  width: 100%;
+  border-radius: $medium;
+}
+
+.instruction-row {
+  border-bottom: 1px solid lightgray;
+}

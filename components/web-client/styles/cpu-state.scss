@@ -1,0 +1,45 @@
+@import "base";
+
+.cpu-state-container {
+  padding: $medium;
+  margin-top: $medium;
+  border-radius: $medium;
+  border: 1px solid $primary-color;
+  width: min-content;
+}
+
+.reg {
+  margin-right: $medium;
+}
+
+.reg-name {
+  background-color: #ffffba;
+  padding: $small $small $small $medium;
+  margin-right: $small;
+  font-weight: 700;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+
+.memory-container {
+  margin-top: $medium;
+  margin-right: $medium;
+  display: grid;
+  grid-template-columns: 3rem repeat(16, 2rem);
+  grid-template-rows: repeat(17, auto);
+}
+
+.memory-cell {
+  border: 1px solid white;
+  font-weight: 700;
+}
+.memory-header {
+  text-align: right;
+  padding: $small;
+  background-color: #c4e6f9;
+}
+
+.memory-value {
+  text-align: right;
+  padding: $small;
+}

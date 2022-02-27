@@ -1,0 +1,48 @@
+$small: 0.25rem;
+$x-small: 0.1rem;
+$medium: 0.5rem;
+$large: 1rem;
+
+$primary-color: #42539c;
+
+* {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button {
+  outline: none;
+  border: 1px solid lightgrey;
+  border-radius: $small;
+  background-color: $primary-color;
+  color: white;
+  padding: $small;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+}
+
+.mr-sm {
+  margin-right: $small;
+}
+
+.mr-md {
+  margin-right: $medium;
+}
+
+.ml-md {
+  margin-left: $medium;
+}
+
+.my-md {
+  margin: $medium 0;
+}
+
+.items-base {
+  align-items: baseline;
+}
