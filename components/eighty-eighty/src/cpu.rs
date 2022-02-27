@@ -277,7 +277,10 @@ impl<T: FnMut(u8)> Cpu<T> {
                 let val = self.load_register_pair(register).wrapping_sub(1);
                 self.set_register_pair(register, val);
             }
-            Instruction::RRC => todo!(),
+            Instruction::RRC => {
+                self.condition_codes.cy = self.a & 1;
+                self.a = self.a.rotate_right(1);
+            }
             Instruction::RAL => todo!(),
             Instruction::RAR => todo!(),
             Instruction::SHLD { address } => todo!("{}", address),

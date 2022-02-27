@@ -659,3 +659,31 @@ fn jnc() -> Result<(), cpu::Error> {
 
     Ok(())
 }
+
+// [RRC] - Rotate Right
+#[test]
+fn rrc() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::A,
+        value: 0xC,
+    })?;
+
+    cpu.execute_instruction(Instruction::RRC)?;
+
+    assert_eq!(cpu.a, 6);
+    assert_eq!(cpu.condition_codes.cy, 0);
+
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::A,
+        value: 0xD,
+    })?;
+
+    cpu.execute_instruction(Instruction::RRC)?;
+
+    assert_eq!(cpu.a, 0x86);
+    assert_eq!(cpu.condition_codes.cy, 1);
+
+    Ok(())
+}
