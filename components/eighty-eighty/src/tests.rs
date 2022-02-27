@@ -511,8 +511,97 @@ fn out() -> Result<(), cpu::Error> {
     Ok(())
 }
 
+// [ADD] - Add Register
+#[test]
+fn add() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::B,
+        value: 0xFF,
+    })?;
+
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::A,
+        value: 0x01,
+    })?;
+
+    cpu.execute_instruction(Instruction::ADD { register: Reg::B })?;
+
+    assert_eq!(cpu.a, 0);
+    assert_eq!(cpu.b, 0xff);
+    assert_eq!(cpu.condition_codes.s, 0);
+    assert_eq!(cpu.condition_codes.z, 1);
+    assert_eq!(cpu.condition_codes.p, 1);
+    assert_eq!(cpu.condition_codes.cy, 1);
+
+    Ok(())
+}
+
 // [JZ] - Jump Zero
 #[test]
 fn jz() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.execute_instruction(Instruction::ADD { register: Reg::B })?;
+
+    let jump_instruction = Instruction::JZ { address: 0x12 };
+    cpu.execute_instruction(jump_instruction)?;
+
+    assert_eq!(cpu.pc, 0x12 - jump_instruction.op_bytes() as u16);
+
+    Ok(())
+}
+
+// [JC] - Jump Carry
+#[test]
+fn jc() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::B,
+        value: 0xff,
+    })?;
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::A,
+        value: 1,
+    })?;
+    cpu.execute_instruction(Instruction::ADD { register: Reg::B })?;
+    let jump_instruction = Instruction::JC { address: 0x82 };
+    cpu.execute_instruction(jump_instruction)?;
+
+    assert_eq!(cpu.pc, 0x82 - jump_instruction.op_bytes() as u16);
+
+    cpu.pc = 1;
+    cpu.execute_instruction(Instruction::ADD { register: Reg::B })?;
+    cpu.execute_instruction(jump_instruction)?;
+    assert_eq!(cpu.pc, 1);
+
+    Ok(())
+}
+
+// [JNC] - Jump Not Carry
+#[test]
+fn jnc() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::B,
+        value: 0xff,
+    })?;
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::A,
+        value: 1,
+    })?;
+    cpu.execute_instruction(Instruction::ADD { register: Reg::B })?;
+    let jump_instruction = Instruction::JNC { address: 0x82 };
+    cpu.execute_instruction(jump_instruction)?;
+
+    assert_eq!(cpu.pc, 0);
+
+    cpu.execute_instruction(Instruction::ADD { register: Reg::B })?;
+    cpu.execute_instruction(jump_instruction)?;
+    assert_eq!(cpu.pc, 0x82 - jump_instruction.op_bytes() as u16);
+
     Ok(())
 }

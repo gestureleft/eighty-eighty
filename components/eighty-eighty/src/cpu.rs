@@ -407,7 +407,11 @@ impl<T: FnMut(u8)> Cpu<T> {
                 self.a = res;
             }
             Instruction::RNC => todo!(),
-            Instruction::JNC { address } => todo!("{}", address),
+            Instruction::JNC { address } => {
+                if 0 == self.condition_codes.cy {
+                    self.pc = address - instruction.op_bytes() as u16;
+                }
+            }
             Instruction::OUT { data } => (self.on_bus_write)(data),
             Instruction::CNC { address } => todo!("{}", address),
             Instruction::SUI { data } => {
@@ -418,7 +422,11 @@ impl<T: FnMut(u8)> Cpu<T> {
                 self.a = res;
             }
             Instruction::RC => todo!(),
-            Instruction::JC { address } => todo!("{}", address),
+            Instruction::JC { address } => {
+                if 0 != self.condition_codes.cy {
+                    self.pc = address - instruction.op_bytes() as u16;
+                }
+            }
             Instruction::IN { data } => todo!("{}", data),
             Instruction::CC { address } => todo!("{}", address),
             Instruction::SBI { data } => {
