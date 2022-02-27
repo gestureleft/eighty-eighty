@@ -489,7 +489,7 @@ impl<T: FnMut(u8)> Cpu<T> {
     fn load_from_memory(&self) -> Result<u8, Error> {
         self.memory
             .iter()
-            .nth((((self.h as u16) << 8) as u8 | self.l).into())
+            .nth((((self.h as u16) << 8) | self.l as u16).into())
             .copied()
             .ok_or_else(|| Error::BadMemoryAccess((((self.h as u16) << 8) as u8 | self.l).into()))
     }

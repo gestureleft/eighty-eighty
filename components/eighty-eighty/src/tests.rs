@@ -513,7 +513,7 @@ fn out() -> Result<(), cpu::Error> {
 
 // [ADD] - Add Register
 #[test]
-fn add() -> Result<(), cpu::Error> {
+fn add_register() -> Result<(), cpu::Error> {
     let mut cpu = Cpu::new(|_| {});
 
     cpu.execute_instruction(Instruction::MVI {
@@ -530,6 +530,36 @@ fn add() -> Result<(), cpu::Error> {
 
     assert_eq!(cpu.a, 0);
     assert_eq!(cpu.b, 0xff);
+    assert_eq!(cpu.condition_codes.s, 0);
+    assert_eq!(cpu.condition_codes.z, 1);
+    assert_eq!(cpu.condition_codes.p, 1);
+    assert_eq!(cpu.condition_codes.cy, 1);
+
+    Ok(())
+}
+
+// [ADD] - Add Memory
+#[test]
+fn add_memory() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.execute_instruction(Instruction::LXI {
+        register: Reg::H,
+        value: 0x3456,
+    })?;
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::M,
+        value: 0xff,
+    })?;
+
+    cpu.execute_instruction(Instruction::MVI {
+        register: Reg::A,
+        value: 1,
+    })?;
+    cpu.execute_instruction(Instruction::ADD { register: Reg::M })?;
+
+    assert_eq!(cpu.a, 0);
+    assert_eq!(cpu.memory[0x3456], 0xff);
     assert_eq!(cpu.condition_codes.s, 0);
     assert_eq!(cpu.condition_codes.z, 1);
     assert_eq!(cpu.condition_codes.p, 1);
