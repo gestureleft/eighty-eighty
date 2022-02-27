@@ -66,33 +66,46 @@ fn app() -> Html {
         })
     };
 
-    let handle_step_forward = {
-        let state_history = state_history.clone();
-        Callback::from(move |_| {
-            let state_history_vals = &*state_history;
-            let mut cpu = state_history[state_history.len() - 1];
-            // FIXME - better error handling
-            cpu.step().expect("Failed to step cpu");
-            let mut new_history = state_history_vals.clone();
-            new_history.push(cpu);
-            state_history.set(new_history);
+    let latest_cpu_state = (*state_history)[(*state_history).len() - 1];
 
-            log::debug!("Just set state history: {}", state_history.len());
+    let step_cpu = {
+        let state_history = state_history.clone();
+        move || {
+            let mut cpu = (*state_history)[(*state_history).len() - 1];
+            cpu.step().expect("Failed to step cpu");
+            let mut new_state_history = (*state_history).clone();
+            new_state_history.push(cpu);
+            state_history.set(new_state_history);
+        }
+    };
+
+    let handle_step_forward = Callback::from(move |_| {
+        step_cpu();
+    });
+
+    let handle_run = {
+        Callback::from(move |_| {
+            let mut new_state_history = (*state_history).clone();
+            let mut cpu = (*state_history)[(*state_history).len() - 1];
+            while !cpu.halted() && new_state_history.len() < 100 {
+                cpu.step().expect("Failed to step cpu");
+                new_state_history.push(cpu);
+            }
+            state_history.set(new_state_history);
         })
     };
 
     log::debug!("App function called!");
 
-    let latest_cpu_state = (*state_history)[(*state_history).len() - 1];
-
     html! {
         <div class="col">
-            <b>{"Assembly Input:"}</b>
+            <b>{"Binary File:"}</b>
             <input ondrop={handle_file_drop} type={"file"}/>
-            <div class="row">
-            <button>{"< Step Backward"}</button>
-            <button>{"Reset"}</button>
-            <button onclick={handle_step_forward}>{"Step Forward >"}</button>
+            <div class="mt-md row">
+                <button class="mr-lg" onclick={handle_run}>{"Run"}</button>
+                <button>{"< Step Backward"}</button>
+                <button>{"Reset"}</button>
+                <button onclick={handle_step_forward}>{"Step Forward >"}</button>
             </div>
             <CpuState<CpuCallback> cpu={latest_cpu_state}/>
         </div>

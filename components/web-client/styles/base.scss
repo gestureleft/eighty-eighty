@@ -43,6 +43,14 @@ button {
   margin: $medium 0;
 }
 
+.mt-md {
+  margin-top: $medium;
+}
+
+.mr-lg {
+  margin-right: $large;
+}
+
 .items-base {
   align-items: baseline;
 }
