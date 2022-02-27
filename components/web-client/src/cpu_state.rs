@@ -52,6 +52,7 @@ pub(crate) fn cpu_state<BusWriteCallback: FnMut(u8) + PartialEq>(
                     <div class="row items-base reg"><div class="reg-name">{"l: "}</div>{format!("{:02X}", cpu.l())}</div>
                     <div class="row items-base reg"><div class="reg-name">{"pc: "}</div>{format!("{:04X}", cpu.pc())}</div>
                     <div class="row items-base reg"><div class="reg-name">{"sp: "}</div>{format!("{:04X}", cpu.sp())}</div>
+                    <div class="row items-base reg"><div class="reg-name">{"halted: "}</div>{if cpu.halted() { "Yes" } else { "No" }.to_owned()}</div>
                 </div>
             </div>
             <div class="my-md">
