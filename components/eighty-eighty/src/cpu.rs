@@ -50,6 +50,7 @@ where
     int_enable: u8,
     on_bus_write: BusWriteCallBack,
     bus: u8,
+    halted: bool,
 }
 
 impl<T: FnMut(u8)> std::fmt::Display for Cpu<T> {
@@ -79,6 +80,7 @@ impl<T: FnMut(u8)> Cpu<T> {
             int_enable: 1,
             on_bus_write,
             bus: 0,
+            halted: false,
         }
     }
 
@@ -120,6 +122,10 @@ impl<T: FnMut(u8)> Cpu<T> {
 
     pub fn sp(&self) -> u16 {
         self.sp
+    }
+
+    pub fn halted(&self) -> bool {
+        self.halted
     }
 
     pub fn write_to_bus(&mut self, value: u8) {
@@ -176,12 +182,19 @@ impl<T: FnMut(u8)> Cpu<T> {
             self.execute_instruction(instruction)?;
             println!("{}", self);
             self.pc += instruction.op_bytes() as u16;
+
+            if self.halted {
+                break;
+            }
         }
 
         Ok(())
     }
 
     pub fn step(&mut self) -> Result<(), Error> {
+        if self.halted {
+            return Ok(());
+        };
         if let Some(instruction) = self.fetch_instruction() {
             self.execute_instruction(instruction)?;
             self.pc += instruction.op_bytes() as u16;
@@ -291,7 +304,9 @@ impl<T: FnMut(u8)> Cpu<T> {
                     self.assign_value(destination, self.get_register_val(source));
                 }
             }
-            Instruction::HLT => todo!(),
+            Instruction::HLT => {
+                self.halted = true;
+            }
             Instruction::ADD { register } => {
                 let res = self
                     .load_from_memory_or_register(register)?
