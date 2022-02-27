@@ -83,11 +83,29 @@ fn app() -> Html {
         step_cpu();
     });
 
+    let handle_step_backward = {
+        let state_history = state_history.clone();
+        Callback::from(move |_| {
+            if (*state_history).len() > 1 {
+                let mut new_state_history = (*state_history).clone();
+                new_state_history.pop();
+                state_history.set(new_state_history);
+            }
+        })
+    };
+
+    let handle_reset = {
+        let state_history = state_history.clone();
+        Callback::from(move |_| {
+            state_history.set(vec![Cpu::new(handle_bus_val as fn(u8) -> ())]);
+        })
+    };
+
     let handle_run = {
         Callback::from(move |_| {
             let mut new_state_history = (*state_history).clone();
             let mut cpu = (*state_history)[(*state_history).len() - 1];
-            while !cpu.halted() && new_state_history.len() < 100 {
+            while !cpu.halted() && new_state_history.len() < 1000 {
                 cpu.step().expect("Failed to step cpu");
                 new_state_history.push(cpu);
             }
@@ -103,8 +121,8 @@ fn app() -> Html {
             <input ondrop={handle_file_drop} type={"file"}/>
             <div class="mt-md row">
                 <button class="mr-lg" onclick={handle_run}>{"Run"}</button>
-                <button>{"< Step Backward"}</button>
-                <button>{"Reset"}</button>
+                <button onclick={handle_step_backward}>{"< Step Backward"}</button>
+                <button onclick={handle_reset}>{"Reset"}</button>
                 <button onclick={handle_step_forward}>{"Step Forward >"}</button>
             </div>
             <CpuState<CpuCallback> cpu={latest_cpu_state}/>
