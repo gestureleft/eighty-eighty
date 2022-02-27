@@ -308,39 +308,42 @@ impl<T: FnMut(u8)> Cpu<T> {
                 self.halted = true;
             }
             Instruction::ADD { register } => {
-                let res = self
+                let (res, overflow) = self
                     .load_from_memory_or_register(register)?
-                    .wrapping_add(self.a) as u16;
+                    .overflowing_add(self.a);
 
-                self.update_condition_codes(res);
+                self.update_condition_codes(res, overflow);
 
-                self.a = (res & 0xff) as u8;
+                self.a = res;
             }
             Instruction::ADC { register } => {
-                let res = self
+                let (res, overflow) = self
                     .load_from_memory_or_register(register)?
-                    .wrapping_add(self.a)
-                    .wrapping_add(self.condition_codes.cy) as u16;
+                    .overflowing_add(self.a);
+                let (res, overflow_two) = res.overflowing_add(self.condition_codes.cy);
 
-                self.update_condition_codes(res);
+                self.update_condition_codes(res, overflow || overflow_two);
 
-                self.a = (res & 0xff) as u8;
+                self.a = res;
             }
             Instruction::SUB { register } => {
-                let res = self.a as u16 - self.load_from_memory_or_register(register)? as u16;
+                let (res, overflow) = self
+                    .a
+                    .overflowing_sub(self.load_from_memory_or_register(register)?);
 
-                self.update_condition_codes(res);
+                self.update_condition_codes(res, overflow);
 
-                self.a = (res & 0xff) as u8;
+                self.a = res;
             }
             Instruction::SBB { register } => {
-                let res = self.a as u16
-                    - self.load_from_memory_or_register(register)? as u16
-                    - self.condition_codes.cy as u16;
+                let (res, overflow) = self
+                    .a
+                    .overflowing_sub(self.load_from_memory_or_register(register)?);
+                let (res, overflow_two) = res.overflowing_sub(self.condition_codes.cy);
 
-                self.update_condition_codes(res);
+                self.update_condition_codes(res, overflow || overflow_two);
 
-                self.a = (res & 0xff) as u8;
+                self.a = res;
             }
             Instruction::ANA { register } => todo!("{}", register),
             Instruction::XRA { register } => todo!("{}", register),
@@ -369,11 +372,11 @@ impl<T: FnMut(u8)> Cpu<T> {
                 self.sp = self.sp.wrapping_sub(2);
             }
             Instruction::ADI { data } => {
-                let res = self.a as u16 + data as u16;
+                let (res, overflow) = self.a.overflowing_add(data);
 
-                self.update_condition_codes(res);
+                self.update_condition_codes(res, overflow);
 
-                self.a = (res & 0xff) as u8;
+                self.a = res;
             }
             Instruction::RST { data } => todo!("{}", data),
             Instruction::RZ => todo!(),
@@ -396,36 +399,35 @@ impl<T: FnMut(u8)> Cpu<T> {
                 self.pc = address.wrapping_sub(instruction.op_bytes().into()) as u16;
             }
             Instruction::ACI { data } => {
-                let res = self.a as u16 + data as u16 + self.condition_codes.cy as u16;
+                let (res, overflow) = self.a.overflowing_add(data);
+                let (res, overflow_two) = res.overflowing_add(self.condition_codes.cy);
 
-                self.update_condition_codes(res);
+                self.update_condition_codes(res, overflow || overflow_two);
 
-                self.a = (res & 0xff) as u8;
+                self.a = res;
             }
             Instruction::RNC => todo!(),
             Instruction::JNC { address } => todo!("{}", address),
             Instruction::OUT { data } => (self.on_bus_write)(data),
             Instruction::CNC { address } => todo!("{}", address),
             Instruction::SUI { data } => {
-                let res = self.a.wrapping_sub(data) as u16;
+                let (res, overflow) = self.a.overflowing_sub(data);
 
-                self.update_condition_codes(res);
+                self.update_condition_codes(res, overflow);
 
-                self.a = (res & 0xff) as u8;
+                self.a = res;
             }
             Instruction::RC => todo!(),
             Instruction::JC { address } => todo!("{}", address),
             Instruction::IN { data } => todo!("{}", data),
             Instruction::CC { address } => todo!("{}", address),
             Instruction::SBI { data } => {
-                let res = self
-                    .a
-                    .wrapping_sub(data)
-                    .wrapping_sub(self.condition_codes.cy) as u16;
+                let (res, overflow) = self.a.overflowing_sub(data);
+                let (res, overflow_two) = res.overflowing_sub(self.condition_codes.cy);
 
-                self.update_condition_codes(res);
+                self.update_condition_codes(res, overflow || overflow_two);
 
-                self.a = (res & 0xff) as u8;
+                self.a = res;
             }
             Instruction::RPO => todo!(),
             Instruction::JPO { address } => todo!("{}", address),
@@ -468,12 +470,12 @@ impl<T: FnMut(u8)> Cpu<T> {
         Ok(())
     }
 
-    fn update_condition_codes(&mut self, value: u16) {
-        self.condition_codes.z = ((value & 0xff) == 0).into();
+    fn update_condition_codes(&mut self, value: u8, overflow: bool) {
+        self.condition_codes.z = (value == 0).into();
         self.condition_codes.s = ((value & 0x80) != 0).into();
         self.update_parity(value);
 
-        self.condition_codes.cy = (value > u8::MAX.into()).into();
+        self.condition_codes.cy = if overflow { 1 } else { 0 };
     }
 
     fn load_from_memory(&self) -> Result<u8, Error> {
