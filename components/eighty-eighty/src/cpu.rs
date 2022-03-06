@@ -449,7 +449,11 @@ impl<T: FnMut(u8)> Cpu<T> {
             Instruction::XTHL => todo!(),
             Instruction::CPO { address } => todo!("{}", address),
             Instruction::ANI { data } => todo!("{}", data),
-            Instruction::RPE => todo!(),
+            Instruction::RPE => {
+                if self.condition_codes.p == 1 {
+                    self.execute_instruction(Instruction::RET)?;
+                }
+            },
             Instruction::PCHL => todo!(),
             Instruction::JPE { address } => todo!("{}", address),
             Instruction::XCHG => {

@@ -687,3 +687,24 @@ fn rrc() -> Result<(), cpu::Error> {
 
     Ok(())
 }
+
+// [RPE] - Return if Parity even
+#[test]
+fn rpe() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.condition_codes.p = 1;
+
+    cpu.execute_instruction(Instruction::RPE)?;
+
+    assert_eq!(cpu.sp, 0x02);
+
+    cpu.sp = 0;
+    cpu.condition_codes.p = 0;
+
+    cpu.execute_instruction(Instruction::RPE)?;
+
+    assert_eq!(cpu.sp, 0x00);
+
+    Ok(())
+}
