@@ -132,6 +132,19 @@ impl<T: FnMut(u8)> Cpu<T> {
         self.bus = value;
     }
 
+    pub fn generate_interrupt(&mut self, value: u8) -> Result<(), Error> {
+        if self.int_enable == 9 || self.halted {
+            return Ok(());
+        }
+
+        let instruction = Instruction::RST { data: value };
+
+        self.execute_instruction(instruction)?;
+        self.pc += instruction.op_bytes() as u16;
+
+        Ok(())
+    }
+
     pub(crate) fn assign_value(&mut self, reg: Reg, val: u8) {
         match reg {
             Reg::A => self.a = val,
@@ -372,7 +385,12 @@ impl<T: FnMut(u8)> Cpu<T> {
 
                 self.a = res;
             }
-            Instruction::RST { data } => todo!("{}", data),
+            Instruction::RST { data } => {
+                self.write_to_memory_at(self.sp.wrapping_sub(1), ((self.pc >> 8) & 0xff) as u8)?;
+                self.write_to_memory_at(self.sp.wrapping_sub(2), (self.pc & 0x00FF) as u8)?;
+                self.sp = self.sp.wrapping_sub(2);
+                self.pc = ((8 * data) as u16).wrapping_sub(instruction.op_bytes() as u16);
+            }
             Instruction::RZ => todo!(),
             Instruction::RET => {
                 self.pc = self.memory[self.sp as usize] as u16
