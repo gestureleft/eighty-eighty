@@ -708,3 +708,18 @@ fn rpe() -> Result<(), cpu::Error> {
 
     Ok(())
 }
+
+// [RST] - Restart
+// Here, we are just testing interrupts really
+#[test]
+fn rst() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.generate_interrupt(2)?;
+
+    assert_eq!(cpu.pc, 2 * 8);
+
+    assert_eq!(cpu.sp, 0xFFFE);
+
+    Ok(())
+}
