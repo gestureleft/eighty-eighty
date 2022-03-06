@@ -176,19 +176,6 @@ impl<T: FnMut(u8)> Cpu<T> {
         Ok(())
     }
 
-    pub(crate) fn emulate(&mut self) -> Result<(), Error> {
-        while let Some(instruction) = self.fetch_instruction() {
-            self.execute_instruction(instruction)?;
-            self.pc += instruction.op_bytes() as u16;
-
-            if self.halted {
-                break;
-            }
-        }
-
-        Ok(())
-    }
-
     pub fn step(&mut self) -> Result<(), Error> {
         if self.halted {
             return Ok(());
@@ -453,7 +440,7 @@ impl<T: FnMut(u8)> Cpu<T> {
                 if self.condition_codes.p == 1 {
                     self.execute_instruction(Instruction::RET)?;
                 }
-            },
+            }
             Instruction::PCHL => todo!(),
             Instruction::JPE { address } => todo!("{}", address),
             Instruction::XCHG => {

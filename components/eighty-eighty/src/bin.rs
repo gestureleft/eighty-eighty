@@ -6,7 +6,12 @@ fn main() -> Result<(), eighty_eighty::Error> {
     let source = std::env::args().nth(1).expect("no source file given");
     let contents = fs::read(source).expect("failed to open source");
 
-    eighty_eighty::emulate(contents)?;
+    let mut cpu = eighty_eighty::Cpu::new(|_| {});
+    cpu.load_into_memory(contents)?;
+
+    while !cpu.halted() {
+        cpu.step()?;
+    }
 
     Ok(())
 }
