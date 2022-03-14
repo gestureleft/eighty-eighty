@@ -781,3 +781,20 @@ fn sta() -> Result<(), cpu::Error> {
 
     Ok(())
 }
+
+// [ANI] - AND Immediate
+#[test]
+fn ani() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.execute_instruction(ADI { data: 2 })?;
+    cpu.execute_instruction(ANI { data: 4 })?;
+
+    assert_eq!(cpu.a, 0);
+    assert_eq!(cpu.condition_codes.ac, 0);
+    assert_eq!(cpu.condition_codes.z, 1);
+    assert_eq!(cpu.condition_codes.p, 1);
+    assert_eq!(cpu.condition_codes.s, 0);
+
+    Ok(())
+}

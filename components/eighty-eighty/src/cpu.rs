@@ -464,7 +464,13 @@ impl<T: FnMut(u8)> Cpu<T> {
             Instruction::JPO { address } => todo!("{}", address),
             Instruction::XTHL => todo!(),
             Instruction::CPO { address } => todo!("{}", address),
-            Instruction::ANI { data } => todo!("{}", data),
+            Instruction::ANI { data } => {
+                self.a &= data;
+                self.condition_codes.z = if self.a == 0 { 1 } else { 0 };
+                self.update_parity(self.a);
+                self.condition_codes.cy = 0;
+                self.condition_codes.ac = 0;
+            }
             Instruction::RPE => {
                 if self.condition_codes.p == 1 {
                     self.execute_instruction(Instruction::RET)?;
