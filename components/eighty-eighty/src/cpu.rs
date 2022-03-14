@@ -355,10 +355,14 @@ impl<T: FnMut(u8)> Cpu<T> {
             Instruction::CMP { register } => todo!("{}", register),
             Instruction::RNZ => todo!(),
             Instruction::POP { register } => {
-                // FIXME - handle `POP PSW`
-                let low = self.load_from_memory_at(self.sp)?;
-                let high = self.load_from_memory_at(self.sp + 1)?;
-                self.set_register_pair(register, ((high as u16) << 8) | low as u16);
+                if register == Reg::Psw {
+                    self.write_processor_status_word(self.load_from_memory_at(self.sp)?);
+                    self.a = self.load_from_memory_at(self.sp.wrapping_add(1))?;
+                } else {
+                    let low = self.load_from_memory_at(self.sp)?;
+                    let high = self.load_from_memory_at(self.sp + 1)?;
+                    self.set_register_pair(register, ((high as u16) << 8) | low as u16);
+                }
                 self.sp = self.sp.wrapping_add(2);
             }
             Instruction::JNZ { address } => {
@@ -512,6 +516,14 @@ impl<T: FnMut(u8)> Cpu<T> {
             | (self.condition_codes.p << 2)
             | (1 << 1)
             | self.condition_codes.cy
+    }
+
+    fn write_processor_status_word(&mut self, processor_status_word: u8) {
+        self.condition_codes.cy = processor_status_word & 0b1;
+        self.condition_codes.p = (processor_status_word & 0b100) >> 2;
+        self.condition_codes.ac = (processor_status_word & 0b10000) >> 4;
+        self.condition_codes.z = (processor_status_word & 0b1000000) >> 6;
+        self.condition_codes.s = (processor_status_word & 0b10000000) >> 7;
     }
 
     fn load_from_memory(&self) -> Result<u8, Error> {
