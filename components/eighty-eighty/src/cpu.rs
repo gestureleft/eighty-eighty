@@ -8,12 +8,16 @@ pub enum Error {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) struct ConditionCodes {
+    // Zero Flag
     pub(crate) z: u8,
+    // Negative Flag
     pub(crate) s: u8,
+    // Parity Flag
     pub(crate) p: u8,
+    // Carry Flag
     pub(crate) cy: u8,
+    // Half Carry Flag
     pub(crate) ac: u8,
-    pub(crate) pad: u8,
 }
 
 impl ConditionCodes {
@@ -24,7 +28,6 @@ impl ConditionCodes {
             p: 0,
             cy: 0,
             ac: 0,
-            pad: 0,
         }
     }
 }
