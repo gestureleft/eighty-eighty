@@ -756,6 +756,19 @@ fn rst() -> Result<(), cpu::Error> {
     Ok(())
 }
 
+// [LDA] - Load Accumulator Direct
+#[test]
+fn lda() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.memory[0xab] = 23;
+    cpu.execute_instruction(LDA { address: 0xab })?;
+
+    assert_eq!(cpu.a, 23);
+
+    Ok(())
+}
+
 // [STA] - Store Accumulator Direct
 #[test]
 fn sta() -> Result<(), cpu::Error> {

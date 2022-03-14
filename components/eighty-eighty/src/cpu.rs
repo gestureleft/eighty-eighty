@@ -294,7 +294,9 @@ impl<T: FnMut(u8)> Cpu<T> {
                 self.write_to_memory_at(address, self.a)?;
             }
             Instruction::STC => todo!(),
-            Instruction::LDA { address } => todo!("{}", address),
+            Instruction::LDA { address } => {
+                self.a = self.load_from_memory_at(address)?;
+            }
             Instruction::CMC => todo!(),
             Instruction::MOV {
                 source,
