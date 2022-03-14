@@ -519,6 +519,40 @@ fn pop() -> Result<(), cpu::Error> {
     Ok(())
 }
 
+// [POP] - Pop PSW
+#[test]
+fn pop_psw() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.execute_instruction(SBI { data: 1 })?;
+
+    assert_eq!(cpu.condition_codes.s, 1);
+    assert_eq!(cpu.condition_codes.z, 0);
+    assert_eq!(cpu.condition_codes.p, 1);
+    assert_eq!(cpu.condition_codes.cy, 1);
+
+    cpu.execute_instruction(PUSH { register: Reg::Psw })?;
+
+    assert_eq!(cpu.memory[0xffff], 0xff);
+    assert_eq!(cpu.memory[0xfffe], 0x87);
+
+    cpu.execute_instruction(ADI { data: 1 })?;
+
+    assert_eq!(cpu.condition_codes.s, 0);
+    assert_eq!(cpu.condition_codes.z, 1);
+    assert_eq!(cpu.condition_codes.p, 1);
+    assert_eq!(cpu.condition_codes.cy, 1);
+
+    cpu.execute_instruction(POP { register: Reg::Psw })?;
+
+    assert_eq!(cpu.condition_codes.s, 1);
+    assert_eq!(cpu.condition_codes.z, 0);
+    assert_eq!(cpu.condition_codes.p, 1);
+    assert_eq!(cpu.condition_codes.cy, 1);
+
+    Ok(())
+}
+
 // [OUT] - Output
 #[test]
 fn out() -> Result<(), cpu::Error> {
