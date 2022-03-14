@@ -372,12 +372,12 @@ impl<T: FnMut(u8)> Cpu<T> {
             Instruction::CNZ { address } => todo!("{}", address),
             Instruction::PUSH { register } => {
                 if register == Reg::Psw {
-                    self.write_to_memory_at(self.sp - 1, self.a)?;
-                    self.write_to_memory_at(self.sp - 2, self.processor_status_word())?;
+                    self.write_to_memory_at(self.sp.wrapping_sub(1), self.a)?;
+                    self.write_to_memory_at(self.sp.wrapping_sub(2), self.processor_status_word())?;
                 } else {
                     let value = self.load_register_pair(register);
-                    self.write_to_memory_at(self.sp - 1, ((value >> 8) & 0xff) as u8)?;
-                    self.write_to_memory_at(self.sp - 2, (value & 0xff) as u8)?;
+                    self.write_to_memory_at(self.sp.wrapping_sub(1), ((value >> 8) & 0xff) as u8)?;
+                    self.write_to_memory_at(self.sp.wrapping_sub(2), (value & 0xff) as u8)?;
                 }
                 self.sp = self.sp.wrapping_sub(2);
             }
