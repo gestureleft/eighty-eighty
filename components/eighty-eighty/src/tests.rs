@@ -755,3 +755,16 @@ fn rst() -> Result<(), cpu::Error> {
 
     Ok(())
 }
+
+// [STA] - Store Accumulator Direct
+#[test]
+fn sta() -> Result<(), cpu::Error> {
+    let mut cpu = Cpu::new(|_| {});
+
+    cpu.a = 0x1e;
+    cpu.execute_instruction(STA { address: 0xf1 })?;
+
+    assert_eq!(cpu.memory[0xf1], 0x1e);
+
+    Ok(())
+}
