@@ -290,7 +290,9 @@ impl<T: FnMut(u8)> Cpu<T> {
             Instruction::CMA => todo!(),
             Instruction::DAA => todo!(),
             Instruction::LHLD { address } => todo!("{}", address),
-            Instruction::STA { address } => todo!("{}", address),
+            Instruction::STA { address } => {
+                self.write_to_memory_at(address, self.a)?;
+            }
             Instruction::STC => todo!(),
             Instruction::LDA { address } => todo!("{}", address),
             Instruction::CMC => todo!(),
