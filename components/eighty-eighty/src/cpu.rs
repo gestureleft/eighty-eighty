@@ -506,12 +506,12 @@ impl<T: FnMut(u8)> Cpu<T> {
     }
 
     pub(crate) fn processor_status_word(&self) -> u8 {
-        self.condition_codes.s
-            | (self.condition_codes.z << 1)
-            | (self.condition_codes.ac << 3)
-            | (self.condition_codes.p << 5)
-            | (1 << 6)
-            | self.condition_codes.cy << 7
+        self.condition_codes.s << 7
+            | (self.condition_codes.z << 6)
+            | (self.condition_codes.ac << 4)
+            | (self.condition_codes.p << 2)
+            | (1 << 1)
+            | self.condition_codes.cy
     }
 
     fn load_from_memory(&self) -> Result<u8, Error> {

@@ -25,7 +25,7 @@ fn parity() {
 fn processor_status_word() {
     let mut cpu = Cpu::new(|_| {});
 
-    assert_eq!(cpu.processor_status_word(), 0b01000000);
+    assert_eq!(cpu.processor_status_word(), 0b00000010);
 
     cpu.condition_codes.z = 1;
 
@@ -33,16 +33,16 @@ fn processor_status_word() {
 
     cpu.condition_codes.s = 1;
 
-    assert_eq!(cpu.processor_status_word(), 0b01000011);
+    assert_eq!(cpu.processor_status_word(), 0b11000010);
 
     cpu.condition_codes.z = 0;
 
-    assert_eq!(cpu.processor_status_word(), 0b01000001);
+    assert_eq!(cpu.processor_status_word(), 0b10000010);
 
     cpu.condition_codes.s = 0;
     cpu.condition_codes.cy = 1;
 
-    assert_eq!(cpu.processor_status_word(), 0b11000000);
+    assert_eq!(cpu.processor_status_word(), 0b00000011);
 }
 
 #[test]
@@ -175,7 +175,6 @@ fn inx() -> Result<(), cpu::Error> {
     assert_eq!(cpu.condition_codes.s, 14);
     assert_eq!(cpu.condition_codes.cy, 16);
     assert_eq!(cpu.condition_codes.ac, 17);
-    assert_eq!(cpu.condition_codes.pad, 18);
 
     Ok(())
 }
